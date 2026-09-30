@@ -73,6 +73,15 @@ Read paths used, all documented:
 
   余额每 60 秒轮询一次，并在登录状态变化时刷新 —— 因为账号命名空间没有提供余额推送流。
 
+- **The balance is never put through a float.** `formatMoney` renders the platform's decimal
+  *string* directly, so it keeps the reported precision: up to **7** fractional digits with a
+  **2**-digit (cent) floor. Trailing zeros above the floor are trimmed, and digits past the 7th are
+  truncated — never rounded up, so the display can never overstate the balance.
+
+  **余额从不经过浮点数。** `formatMoney` 直接按平台返回的十进制**字符串**渲染，因此保留原始精度：
+  最多 **7** 位小数，最少 **2** 位（分）。超出「分」的末尾零会去掉，第 7 位之后的数字直接截断 ——
+  不做进位，所以显示值永远不会高估余额。
+
 ## Design constraints honoured 遵守的设计约束
 
 - **No Harness client package is imported.** React comes from the page's platform module table

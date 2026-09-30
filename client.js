@@ -54,22 +54,35 @@ window.__ModuleLoader__.load({
       return `${scaled(value / 1e6)}M`;
     }
 
+    /** Fractional digits the balance display keeps — the platform reports
+     * sub-cent amounts, and this is the precision the widget promises. */
+    const MONEY_MAX_DECIMALS = 7;
+    /** Cents are always shown, even when the platform reports a coarser value. */
+    const MONEY_MIN_DECIMALS = 2;
+
     /**
      * Currency formatter for a wallet pair reported by the platform. `balance`
      * is a decimal STRING that may be negative or sub-cent, so it is formatted
-     * as text (never coerced through a float) to preserve the platform's value.
+     * as text — never coerced through a float, which would round it — keeping
+     * the platform's precision down to {@link MONEY_MAX_DECIMALS} decimal places.
      */
     function formatMoney(currency, balance) {
       const symbol = currency === 'CNY' ? '\u00a5' : '$';
-      const raw = typeof balance === 'string' ? balance : String(balance ?? '');
+      const raw = typeof balance === 'string' ? balance.trim() : String(balance ?? '');
       if (raw === '' || raw === '—') return `${symbol}—`;
       if (!/^-?\d+(?:\.\d+)?$/.test(raw)) return `${symbol}${raw}`;
-      const frac = raw.includes('.') ? raw.slice(raw.indexOf('.') + 1) : '';
-      let text = raw;
-      if (frac.length === 0) text = `${raw}.00`;
-      else if (frac.length === 1) text = `${raw}0`;
-      else if (frac.length > 2) text = raw.replace(/0+$/, '').replace(/\.$/, '');
-      return `${symbol}${text}`;
+      const negative = raw.startsWith('-');
+      const body = negative ? raw.slice(1) : raw;
+      const dot = body.indexOf('.');
+      const whole = dot === -1 ? body : body.slice(0, dot);
+      const reported = dot === -1 ? '' : body.slice(dot + 1);
+      // Keep what the platform reported, up to the documented precision.
+      const capped = reported.slice(0, MONEY_MAX_DECIMALS);
+      // Trailing zeros are noise, but cents are not: never drop below the floor.
+      const trimmed = capped.replace(/0+$/, '');
+      const frac =
+        trimmed.length >= MONEY_MIN_DECIMALS ? trimmed : reported.padEnd(MONEY_MIN_DECIMALS, '0').slice(0, MONEY_MIN_DECIMALS);
+      return `${symbol}${negative ? '-' : ''}${whole}.${frac}`;
     }
 
     /** Minimal observable store so plain React can subscribe without host primitives. */
