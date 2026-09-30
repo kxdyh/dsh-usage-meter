@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Usage & Balance Meter",
+    "description": "Shows live context/token usage and the signed-in account balance at the sidebar foot."
+  }
+}

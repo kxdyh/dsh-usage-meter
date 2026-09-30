@@ -1,0 +1,44 @@
+{
+  "name": "@local/dsh-usage-meter",
+  "version": "1.0.0",
+  "description": "Sidebar meter for DeepSeek Harness: live context/token usage and the signed-in account balance.",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "dsh",
+    "cordis",
+    "plugin",
+    "usage",
+    "token",
+    "balance",
+    "sidebar"
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  }
+}
