@@ -1,4 +1,4 @@
 - insert:
-    - id: local-usage-meter
-      name: '@local/dsh-usage-meter'
+    - id: dsh-usage-meter
+      name: '@kxdyh/dsh-usage-meter'
       config: {}

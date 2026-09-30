@@ -1,5 +1,5 @@
 {
-  "name": "@local/dsh-usage-meter",
+  "name": "@kxdyh/dsh-usage-meter",
   "version": "1.0.0",
   "description": "Sidebar meter for DeepSeek Harness: live context/token usage and the signed-in account balance.",
   "type": "module",
@@ -15,6 +15,17 @@
     "balance",
     "sidebar"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kxdyh/dsh-usage-meter.git"
+  },
+  "homepage": "https://github.com/kxdyh/dsh-usage-meter#readme",
+  "bugs": {
+    "url": "https://github.com/kxdyh/dsh-usage-meter/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",

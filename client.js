@@ -15,13 +15,13 @@
  * module table and styling uses `--dsw-alias-*` theme tokens only.
  */
 window.__ModuleLoader__.load({
-  id: '@local/dsh-usage-meter',
+  id: '@kxdyh/dsh-usage-meter',
   factory(require) {
     const React = require('react');
     const h = React.createElement;
     const { useState, useEffect, useSyncExternalStore } = React;
 
-    const CSS_TAG = '@local/dsh-usage-meter/meter.css';
+    const CSS_TAG = '@kxdyh/dsh-usage-meter/meter.css';
     // Styling follows the host: only --dsw-alias-* theme tokens, sidebar row
     // metrics, and tabular figures so the numbers do not jitter as they tick.
     const CSS = [
@@ -530,7 +530,7 @@ window.__ModuleLoader__.load({
     const NS = 'usage-meter';
 
     return {
-      name: '@local/dsh-usage-meter',
+      name: '@kxdyh/dsh-usage-meter',
       // `remote.account` orders this plugin after the account Remote namespace
       // exists; `sessions` provides the Client Session bindings the projection
       // bridge borrows from.
@@ -544,7 +544,7 @@ window.__ModuleLoader__.load({
         // One stylesheet, owned by this plugin's effect lifetime.
         ctx.effect(() => {
           const style = document.createElement('style');
-          style.dataset.plugin = '@local/dsh-usage-meter';
+          style.dataset.plugin = '@kxdyh/dsh-usage-meter';
           style.dataset.pluginCss = CSS_TAG;
           style.textContent = CSS;
           document.head.appendChild(style);

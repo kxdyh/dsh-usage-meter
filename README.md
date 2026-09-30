@@ -88,13 +88,19 @@ dsh plugin --profile <profile> add /absolute/path/to/dsh-usage-meter-1.0.0.tgz
 **From a registry** (after publishing, see below):
 
 ```bash
-dsh plugin --profile <profile> add dsh-usage-meter
+dsh plugin --profile <profile> add @kxdyh/dsh-usage-meter
+```
+
+**From GitHub** (works as soon as the repository is public):
+
+```bash
+dsh plugin --profile <profile> add github:kxdyh/dsh-usage-meter
 ```
 
 ### Enabling / removing
 
 `dsh plugin` installs *and* selects the bundle. Removing it with
-`plugin_manager(remove_bundle, target: "@local/dsh-usage-meter")` deselects, unloads, and runs
+`plugin_manager(remove_bundle, target: "@kxdyh/dsh-usage-meter")` deselects, unloads, and runs
 `pnpm remove`.
 
 ### Reloading after an edit
@@ -118,11 +124,15 @@ file format. The installer (`plugin_manager` / `dsh plugin add`) accepts four sp
 Community **discovery** is a GitHub topic plus awesome lists — marketplaces in the ecosystem browse
 `github.com/topics/dsh-plugin`. So a community release is normally:
 
-1. rename the package to a name you can publish (the `@local/` scope is a local placeholder and is
-   **not publishable**; use your own npm scope or an unscoped name);
-2. keep the `dsh-plugin` keyword, and tag the GitHub repo with the `dsh-plugin` topic;
-3. `pnpm publish --access public`;
+1. **Publish the repository** at `github.com/kxdyh/dsh-usage-meter` and tag it with the
+   `dsh-plugin` topic (that topic is how the marketplaces find it);
+2. keep the `dsh-plugin` keyword in `package.json` (already present);
+3. publish to npm: `pnpm publish --access public` (the scoped name needs
+   `publishConfig.access = public`, already set);
 4. optionally open a PR/issue against the community registries so they index it.
+
+Until npm publication, `github:kxdyh/dsh-usage-meter` and the `.tgz` release artifact are both
+installable, so the GitHub release alone is a complete community release.
 
 > Note: `private` was intentionally removed from this manifest so the package is publishable. The
 > local install in this machine's profile is a `link:` to this directory, so the running plugin is
