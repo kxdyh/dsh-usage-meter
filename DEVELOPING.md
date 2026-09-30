@@ -49,6 +49,17 @@ Read paths used, all documented:
   `useSessions`（根作用域插槽的标准 prop）用于选出当前活跃的会话。
 - `ctx.locale.register` / `ctx.locale.bind` for zh + en.
   通过 `ctx.locale.register` / `ctx.locale.bind` 提供中英文本。
+- The **manual refresh** in the detail panel is one `inject` prop, `onRefresh`: it calls
+  `usage.refresh()` (re-read the projection faces) and awaits `balance.refresh()` (one account
+  Remote read). The balance controller de-dupes a read already in flight, so repeated clicks cannot
+  stack requests. Operation props are injected the same way by shipped plugins — `ui-cordis` gives
+  its panel an `onRefresh` too. The button owns only a local `refreshing` flag for its busy label;
+  busy/失败状态本身由余额控制器的 `phase` 表达。
+
+  明细面板里的**手动刷新**是一个 `inject` prop（`onRefresh`）：先调 `usage.refresh()`（重读投影 face），
+  再 await `balance.refresh()`（一次账号 Remote 读取）。余额控制器对"已在飞行中的读取"做去重，
+  所以连点不会堆积请求。宿主插件也用同样方式注入操作（`ui-cordis` 就给它的面板注入了 `onRefresh`）。
+  按钮自身只持有一个 `refreshing` 布尔量用于忙时文案；忙/失败状态本身由余额控制器的 `phase` 表达。
 
 ### Honest limits 如实的限制
 

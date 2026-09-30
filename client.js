@@ -43,6 +43,10 @@ window.__ModuleLoader__.load({
       '.lum-ring-track{fill:none;stroke:var(--dsw-alias-border-l3);stroke-width:2px}',
       '.lum-ring-fill{fill:none;stroke:var(--dsw-alias-label-tertiary);stroke-width:2px;stroke-linecap:round}',
       '.lum-rail-value{color:var(--dsw-alias-label-tertiary);font-size:10px;line-height:12px;font-variant-numeric:tabular-nums;max-width:52px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.lum-actions{display:flex;align-items:center;gap:6px;margin-top:3px}',
+      '.lum-refresh{border:0;border-radius:var(--dsw-radius-sm,6px);background:0 0;color:var(--dsw-alias-label-tertiary);font:inherit;font-size:11px;line-height:16px;padding:3px 8px;cursor:pointer}',
+      '.lum-refresh:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary)}',
+      '.lum-refresh:disabled{opacity:.55;cursor:default}',
     ].join('');
 
     /** Compact count formatter matching the host's own context meter. */
@@ -191,6 +195,8 @@ window.__ModuleLoader__.load({
         // Store-like surface: the widget binds these through useSyncExternalStore.
         subscribe: (listener) => store.subscribe(listener),
         getSnapshot: () => store.getSnapshot(),
+        /** Re-read the current projection faces (the manual-refresh path). */
+        refresh: publish,
         select(sessionId) {
           if (sessionId === currentId) return;
           currentId = sessionId;
@@ -374,7 +380,7 @@ window.__ModuleLoader__.load({
      * the business inject (`usage`, `balance`, `t`).
      */
     function UsageMeter(props) {
-      const { wide, useSessions, usage, balance, t } = props;
+      const { wide, useSessions, usage, balance, onRefresh, t } = props;
 
       // Select only the active conversation's identity; the store does the rest.
       const sessionId = useSessions((state) => {
@@ -392,6 +398,23 @@ window.__ModuleLoader__.load({
       }, [sessionId, usage]);
 
       const [open, setOpen] = useState(false);
+      const [refreshing, setRefreshing] = useState(false);
+      /**
+       * Manual refresh: re-read the account balance and re-publish the token
+       * snapshot. The balance controller de-dupes a read already in flight, so
+       * repeated clicks cannot stack requests.
+       */
+      const handleRefresh = async () => {
+        if (refreshing) return;
+        setRefreshing(true);
+        try {
+          await onRefresh();
+        } catch {
+          /* the balance controller records its own failure state */
+        } finally {
+          setRefreshing(false);
+        }
+      };
       const pressure = usageSnapshot.pressure;
       const usedTokens = pressure?.projectedTokens ?? pressure?.pressureTokens;
       const contextWindow = pressure?.contextWindow;
@@ -500,6 +523,21 @@ window.__ModuleLoader__.load({
                 ),
               ),
               h('span', { className: 'lum-muted' }, t('detail.note')),
+              h(
+                'div',
+                { className: 'lum-actions' },
+                h(
+                  'button',
+                  {
+                    type: 'button',
+                    className: 'lum-refresh',
+                    disabled: refreshing,
+                    title: t('action.refreshTitle'),
+                    onClick: handleRefresh,
+                  },
+                  refreshing ? t('action.refreshing') : `\u21bb ${t('action.refresh')}`,
+                ),
+              ),
             )
           : null,
       );
@@ -521,6 +559,9 @@ window.__ModuleLoader__.load({
         'detail.cacheWrite': '缓存写入',
         'detail.bonus': '赠送余额',
         'detail.note': '上下文用量来自 contextPressure 投影；余额来自账户服务。',
+        'action.refresh': '刷新',
+        'action.refreshing': '刷新中…',
+        'action.refreshTitle': '立即重新读取余额与用量',
       },
       en: {
         'title.usage': 'Live usage and balance',
@@ -537,6 +578,9 @@ window.__ModuleLoader__.load({
         'detail.cacheWrite': 'Cache write',
         'detail.bonus': 'Bonus balance',
         'detail.note': 'Context usage comes from the contextPressure projection; balance from the account service.',
+        'action.refresh': 'Refresh',
+        'action.refreshing': 'Refreshing…',
+        'action.refreshTitle': 'Re-read the balance and usage now',
       },
     };
 
@@ -585,6 +629,13 @@ window.__ModuleLoader__.load({
               inject: () => ({
                 usage,
                 balance: balance.store,
+                // One manual operation over both sources: the balance is re-read
+                // from the account Remote, and the token snapshot is re-published
+                // from the projection faces.
+                onRefresh: async () => {
+                  usage.refresh();
+                  await balance.refresh();
+                },
                 t,
               }),
             },
